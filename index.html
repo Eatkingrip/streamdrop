@@ -3,15 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Title</title>
+    <title>StreamDrop</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 60%;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 24px;
+            color: #333;
+            margin: 0;
+        }
+        .search-bar {
+            margin: 20px 0;
+        }
+        input[type="text"] {
+            width: 70%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        input[type="button"] {
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #0073e6;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        .results {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .radio-group {
+            margin: 10px 0;
+        }
+    </style>
 </head>
 <body>
-    <h1>Test Title</h1>
-    <iframe src="https://www.2embed.skin/embedtv/tt3107288&s=1&e=1" 
-            width="100%" height="500" 
-            frameborder="0" 
-            scrolling="no" 
-            allowfullscreen>
-    </iframe>
+
+<div class="container">
+    <div class="header">
+        <h1>StreamDrop</h1>
+    </div>
+    
+    <div class="search-bar">
+        <input type="text" id="searchQuery" placeholder="Search for a movie or TV show...">
+        <input type="button" value="Go" onclick="performSearch()">
+    </div>
+
+    <div class="radio-group">
+        <input type="radio" id="movie" name="type" value="movie" checked>
+        <label for="movie">Movie</label>
+        <input type="radio" id="tv" name="type" value="series">
+        <label for="tv">TV</label>
+    </div>
+
+    <div id="results" class="results"></div>
+</div>
+
+<script>
+    const API_KEY = '931664f0'; // Your OMDb API key
+
+    async function performSearch() {
+        const query = document.getElementById('searchQuery').value;
+        const type = document.querySelector('input[name="type"]:checked').value;
+
+        if (!query) {
+            alert("Please enter a search term!");
+            return;
+        }
+
+        const url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(query)}&type=${type}`;
+
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.Response === "True") {
+                displayResults(data.Search);
+            } else {
+                document.getElementById('results').innerHTML = `<p>No results found for "${query}"</p>`;
+            }
+        } catch (error) {
+            console.error("Error fetching data from OMDb API:", error);
+            document.getElementById('results').innerHTML = `<p>Error fetching data. Please try again later.</p>`;
+        }
+    }
+
+    function displayResults(results) {
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = results.map(item => `
+            <div>
+                <h3>${item.Title} (${item.Year})</h3>
+                <p>Type: ${item.Type}</p>
+                <img src="${item.Poster !== 'N/A' ? item.Poster : 'https://via.placeholder.com/100x150?text=No+Image'}" alt="${item.Title}" width="100">
+            </div>
+        `).join('');
+    }
+</script>
+
 </body>
 </html>
