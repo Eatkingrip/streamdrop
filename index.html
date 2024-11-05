@@ -111,7 +111,13 @@
             return;
         }
 
-        const url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(searchTerm)}&type=${searchType}&page=${currentPage}`;
+        let url;
+        if (searchType === 'movie') {
+            url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(searchTerm)}&type=movie&page=${currentPage}`;
+        } else {
+            url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(searchTerm)}&type=series&page=${currentPage}`;
+        }
+
         const response = await fetch(url);
         const data = await response.json();
 
