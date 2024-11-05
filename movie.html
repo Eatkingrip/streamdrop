@@ -23,6 +23,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
             text-align: center;
+            position: relative; /* Add this for positioning the button */
         }
         .movie-info img {
             width: 100%;
@@ -53,8 +54,9 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
         .go-back {
-            margin-top: 20px;
-            display: inline-block;
+            position: absolute; /* Positioning the button */
+            top: 20px; /* Distance from the top */
+            right: 20px; /* Distance from the right */
             padding: 12px 20px;
             font-size: 16px;
             background-color: #0073e6;
@@ -73,11 +75,11 @@
 <body>
 
 <div class="container">
+    <a href="index.html" class="go-back">Go Back</a> <!-- Go Back Button -->
     <div id="movie-info" class="movie-info">
         <!-- Movie details will be dynamically populated here -->
     </div>
     <iframe id="movie-iframe" frameborder="0" scrolling="no" allowfullscreen></iframe>
-    <a href="index.html" class="go-back">Go Back</a> <!-- Go Back Button -->
 </div>
 
 <script>
