@@ -110,6 +110,9 @@
         const response = await fetch(url);
         const data = await response.json();
 
+        // Debugging log to check the API response
+        console.log(data);
+
         if (data.Response === "True") {
             totalResults = parseInt(data.totalResults);
             displayResults(data.Search, mediaType);
@@ -137,10 +140,9 @@
                     <h3>${item.Title}</h3>
                     <p>(${item.Year})</p>
                 `;
-                // Set click event to store the selected item ID without immediate redirection
+                // Set click event to store the selected item ID and redirect to the correct page
                 card.onclick = () => {
                     localStorage.setItem(mediaType === 'movie' ? 'selectedMovieID' : 'selectedShowID', item.imdbID);
-                    // Here we do not redirect to the page
                     if (mediaType === 'movie') {
                         window.location.href = 'movie.html'; // Redirect to movie page
                     } else {
