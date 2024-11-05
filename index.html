@@ -144,10 +144,10 @@
                 <h3>${item.Title}</h3>
                 <p>(${item.Year})</p>
             `;
-            // Set click event to redirect with IMDb ID as URL parameter
+            // Store the selected item ID in the URL for easy retrieval
             card.onclick = () => {
-                const pageType = searchType === 'movie' ? 'movie' : 'tv';
-                window.location.href = `${pageType}.html?imdbID=${item.imdbID}`; // Append IMDb ID to the URL
+                const idType = searchType === 'movie' ? 'movie' : 'show';
+                window.location.href = `${idType}.html?imdbID=${item.imdbID}`;
             };
             resultsContainer.appendChild(card);
         });
