@@ -3,38 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StreamDrop - Movies and TV Shows</title>
+    <title>StreamDrop</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
             color: #f4f4f4;
             background-color: #121212;
             margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             padding: 20px;
         }
         h1 {
             color: #ffffff;
             font-size: 36px;
             margin-bottom: 20px;
-            font-weight: 600;
         }
-        .search-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
+        .container {
+            text-align: center;
         }
         .search-box {
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            width: 300px;
+            margin-bottom: 20px;
         }
-        .go-button {
+        .search-input {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #0073e6;
+            border-radius: 6px;
+            margin-right: 10px;
+        }
+        .search-button {
             padding: 10px 20px;
-            margin-left: 10px;
             background-color: #0073e6;
             color: #fff;
             border: none;
@@ -42,17 +39,17 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
-        .go-button:hover {
+        .search-button:hover {
             background-color: #005bb5;
         }
-        .radio-container {
-            margin: 0 20px;
+        .radios {
+            margin: 20px 0;
         }
-        .results {
+        .results-container {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 10px;
-            width: 100%;
+            margin-top: 20px;
         }
         .result-card {
             background-color: #1e1e1e;
@@ -65,102 +62,76 @@
         .result-card:hover {
             transform: scale(1.05);
         }
-        .view-more {
-            margin-top: 20px;
-            padding: 12px 20px;
-            background-color: #0073e6;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        .view-more:hover {
-            background-color: #005bb5;
+        img {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
         }
     </style>
 </head>
 <body>
 
-<h1>StreamDrop</h1>
-<div class="search-container">
-    <input type="text" id="search-input" class="search-box" placeholder="Search for movies or TV shows...">
-    <div class="radio-container">
-        <label><input type="radio" name="category" value="movie" checked> Movie</label>
-        <label><input type="radio" name="category" value="series"> TV Show</label>
+<div class="container">
+    <h1>StreamDrop</h1>
+    <div class="search-box">
+        <input type="text" id="search-input" class="search-input" placeholder="Search for a movie or TV show...">
+        <button class="search-button" onclick="search()">Go</button>
     </div>
-    <button class="go-button" onclick="search()">Go</button>
+    <div class="radios">
+        <label><input type="radio" name="category" value="movie" checked> Movie</label>
+        <label><input type="radio" name="category" value="tv"> TV Show</label>
+    </div>
+    <div id="results" class="results-container"></div>
 </div>
-
-<div id="results" class="results"></div>
-<button id="view-more" class="view-more" style="display:none;" onclick="loadMore()">View More</button>
 
 <script>
     const API_KEY = '931664f0'; // Your OMDb API key
-    let currentPage = 1;
-    let totalResults = 0;
-    let searchType = 'movie'; // Default search type
 
     async function search() {
         const searchTerm = document.getElementById('search-input').value.trim();
-        currentPage = 1; // Reset currentPage for new search
-        searchType = document.querySelector('input[name="category"]:checked').value; // Get selected category
-
+        const category = document.querySelector('input[name="category"]:checked').value;
+        
         if (!searchTerm) {
-            alert("Please enter a search term.");
+            document.getElementById('results').innerHTML = '<p>Please enter a search term.</p>';
             return;
         }
-
-        let url;
-        if (searchType === 'movie') {
-            url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(searchTerm)}&type=movie&page=${currentPage}`;
-        } else {
-            url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(searchTerm)}&type=series&page=${currentPage}`;
-        }
-
+        
+        // Construct URL for API request
+        const url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(searchTerm)}&type=${category}`;
         const response = await fetch(url);
         const data = await response.json();
 
-        console.log("API Response:", data); // Debugging log
-
         if (data.Response === "True") {
-            totalResults = parseInt(data.totalResults);
-            displayResults(data.Search);
-            document.getElementById('view-more').style.display = (currentPage * 10 < totalResults) ? 'block' : 'none';
+            displayResults(data.Search, category);
         } else {
-            document.getElementById('results').innerHTML = `<p>${data.Error}</p>`;
+            document.getElementById('results').innerHTML = '<p>No results found.</p>';
         }
     }
 
-    function displayResults(results) {
+    function displayResults(results, category) {
         const resultsContainer = document.getElementById('results');
-        resultsContainer.innerHTML = '';
+        resultsContainer.innerHTML = ''; // Clear previous results
 
-        results.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'result-card';
-            card.innerHTML = `
-                <img src="${item.Poster !== 'N/A' ? item.Poster : 'https://via.placeholder.com/300x450?text=No+Image'}" alt="${item.Title}" width="100%">
-                <h3>${item.Title}</h3>
-                <p>(${item.Year})</p>
-            `;
-            // Set click event to store the selected item ID and redirect to the respective page
-            card.onclick = () => {
-                if (searchType === 'movie') {
-                    localStorage.setItem('selectedMovieID', item.imdbID);
-                    window.location.href = 'movie.html'; // Redirect to movie page
+        results.forEach(result => {
+            const resultCard = document.createElement('div');
+            resultCard.className = 'result-card';
+            resultCard.onclick = () => {
+                if (category === "movie") {
+                    window.location.href = `movie.html?id=${result.imdbID}`; // Redirect to movie page
                 } else {
-                    localStorage.setItem('selectedShowID', item.imdbID);
-                    window.location.href = 'tv_show.html'; // Redirect to TV show page
+                    localStorage.setItem('selectedShowID', result.imdbID);
+                    window.location.href = 'tv.html'; // Redirect to TV page
                 }
             };
-            resultsContainer.appendChild(card);
-        });
-    }
 
-    function loadMore() {
-        currentPage++;
-        search();
+            const poster = document.createElement('img');
+            poster.src = result.Poster;
+            resultCard.appendChild(poster);
+            const title = document.createElement('p');
+            title.innerText = result.Title;
+            resultCard.appendChild(title);
+            resultsContainer.appendChild(resultCard);
+        });
     }
 </script>
 
