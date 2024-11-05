@@ -25,12 +25,15 @@
             display: flex;
             justify-content: center;
             margin-bottom: 20px;
+            width: 100%;
+            max-width: 800px;
         }
         .search-box {
             padding: 10px;
             border: none;
             border-radius: 6px;
             width: 300px;
+            font-size: 16px;
         }
         .go-button {
             padding: 10px 20px;
@@ -40,6 +43,7 @@
             border: none;
             border-radius: 6px;
             cursor: pointer;
+            font-size: 16px;
             transition: background-color 0.3s ease;
         }
         .go-button:hover {
@@ -47,12 +51,16 @@
         }
         .radio-container {
             margin: 0 20px;
+            display: flex;
+            align-items: center;
         }
         .results {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
             width: 100%;
+            max-width: 1200px;
+            margin-top: 20px;
         }
         .result-card {
             background-color: #1e1e1e;
@@ -60,10 +68,17 @@
             padding: 10px;
             text-align: center;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: transform 0.2s, background-color 0.3s;
         }
         .result-card:hover {
             transform: scale(1.05);
+            background-color: #2a2a2a;
+        }
+        .result-card img {
+            border-radius: 10px;
+            max-height: 300px;
+            object-fit: cover;
+            margin-bottom: 10px;
         }
         .view-more {
             margin-top: 20px;
@@ -73,6 +88,7 @@
             border: none;
             border-radius: 6px;
             cursor: pointer;
+            font-size: 16px;
             transition: background-color 0.3s ease;
         }
         .view-more:hover {
@@ -140,7 +156,7 @@
             const card = document.createElement('div');
             card.className = 'result-card';
             card.innerHTML = `
-                <img src="${item.Poster !== 'N/A' ? item.Poster : 'https://via.placeholder.com/300x450?text=No+Image'}" alt="${item.Title}" width="100%">
+                <img src="${item.Poster !== 'N/A' ? item.Poster : 'https://via.placeholder.com/300x450?text=No+Image'}" alt="${item.Title}">
                 <h3>${item.Title}</h3>
                 <p>(${item.Year})</p>
             `;
