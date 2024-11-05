@@ -144,15 +144,10 @@
                 <h3>${item.Title}</h3>
                 <p>(${item.Year})</p>
             `;
-            // Set click event to store the selected item ID and redirect to the respective page
+            // Set click event to redirect with IMDb ID as URL parameter
             card.onclick = () => {
-                if (searchType === 'movie') {
-                    localStorage.setItem('selectedMovieID', item.imdbID);
-                    window.location.href = 'movie.html'; // Redirect to movie page
-                } else {
-                    localStorage.setItem('selectedShowID', item.imdbID);
-                    window.location.href = 'tv.html'; // Redirect to TV show page
-                }
+                const pageType = searchType === 'movie' ? 'movie' : 'tv';
+                window.location.href = `${pageType}.html?imdbID=${item.imdbID}`; // Append IMDb ID to the URL
             };
             resultsContainer.appendChild(card);
         });
