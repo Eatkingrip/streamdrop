@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TV Show Details</title>
+    <title>TV Show Details - StreamDrop</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -11,65 +11,31 @@
             background-color: #121212;
             margin: 0;
             padding: 20px;
-            text-align: center;
         }
         h1 {
             color: #ffffff;
-            margin-bottom: 20px;
         }
-        .details-container {
-            background-color: #1e1e1e;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px auto;
-            width: 80%;
-            max-width: 600px;
-        }
-        img {
-            max-width: 100%;
-            border-radius: 12px;
-        }
-        .season-button, .episode-button {
-            margin: 5px;
-            padding: 10px 15px;
-            background-color: #0073e6;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        .season-button:hover, .episode-button:hover {
-            background-color: #005bb5;
-        }
-        .iframe-container {
+        #details {
             margin-top: 20px;
-            display: none; /* Initially hidden */
         }
-        iframe {
-            width: 100%;
-            height: 400px;
-            border: none;
+        #iframe-container {
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
 <h1>TV Show Details</h1>
-<div id="details" class="details-container"></div>
-
-<div id="season-buttons" class="season-buttons"></div>
-<div id="episode-buttons" class="episode-buttons"></div>
-
-<div id="iframe-container" class="iframe-container">
-    <iframe id="episode-iframe" src="" allowfullscreen></iframe>
-</div>
+<div id="details"></div>
+<div id="iframe-container"></div>
 
 <script>
     const API_KEY = '931664f0'; // Your OMDb API key
 
     async function fetchShowDetails() {
-        const showID = localStorage.getItem('selectedShowID');
+        const urlParams = new URLSearchParams(window.location.search);
+        const showID = urlParams.get('imdbID'); // Get the imdbID parameter
+
         if (!showID) {
             document.getElementById('details').innerHTML = '<p>No TV show selected.</p>';
             return;
@@ -86,72 +52,20 @@
         }
     }
 
-    function displayShowDetails(show) {
+    function displayShowDetails(data) {
         const detailsContainer = document.getElementById('details');
         detailsContainer.innerHTML = `
-            <h2>${show.Title} (${show.Year})</h2>
-            <img src="${show.Poster !== 'N/A' ? show.Poster : 'https://via.placeholder.com/300x450?text=No+Image'}" alt="${show.Title}">
-            <p><strong>Genre:</strong> ${show.Genre}</p>
-            <p><strong>Plot:</strong> ${show.Plot}</p>
-            <p><strong>Seasons:</strong> ${show.totalSeasons}</p>
-            <p><strong>IMDB Rating:</strong> ${show.imdbRating}</p>
-            <p><strong>Released:</strong> ${show.Released}</p>
+            <h2>${data.Title} (${data.Year})</h2>
+            <img src="${data.Poster}" alt="${data.Title}" style="width: 300px;">
+            <p><strong>Seasons:</strong> ${data.totalSeasons}</p>
+            <p><strong>Genre:</strong> ${data.Genre}</p>
+            <p><strong>Plot:</strong> ${data.Plot}</p>
         `;
-        
-        // Create season buttons
-        createSeasonButtons(show.totalSeasons);
+
+        // Optionally add iframe or buttons for season/episode navigation here
     }
 
-    function createSeasonButtons(totalSeasons) {
-        const seasonButtonsContainer = document.getElementById('season-buttons');
-        seasonButtonsContainer.innerHTML = ''; // Clear previous buttons
-        
-        for (let i = 1; i <= totalSeasons; i++) {
-            const button = document.createElement('button');
-            button.innerText = `Season ${i}`;
-            button.className = 'season-button';
-            button.onclick = () => fetchEpisodes(i);
-            seasonButtonsContainer.appendChild(button);
-        }
-    }
-
-    async function fetchEpisodes(season) {
-        const showID = localStorage.getItem('selectedShowID');
-        // Here you would typically call an API to get episodes for a specific season.
-        // For now, let's simulate with dummy data.
-        const episodes = [
-            { title: `Episode 1 - Season ${season}`, iframeSrc: 'https://example.com/episode1' },
-            { title: `Episode 2 - Season ${season}`, iframeSrc: 'https://example.com/episode2' },
-            // Add more episodes as necessary
-        ];
-        displayEpisodeButtons(episodes);
-    }
-
-    function displayEpisodeButtons(episodes) {
-        const episodeButtonsContainer = document.getElementById('episode-buttons');
-        episodeButtonsContainer.innerHTML = ''; // Clear previous buttons
-        
-        episodes.forEach(episode => {
-            const button = document.createElement('button');
-            button.innerText = episode.title;
-            button.className = 'episode-button';
-            button.onclick = () => playEpisode(episode.iframeSrc);
-            episodeButtonsContainer.appendChild(button);
-        });
-
-        // Show the episode buttons section
-        episodeButtonsContainer.style.display = 'block';
-    }
-
-    function playEpisode(iframeSrc) {
-        const iframeContainer = document.getElementById('iframe-container');
-        const episodeIframe = document.getElementById('episode-iframe');
-        episodeIframe.src = iframeSrc; // Set the iframe source to the selected episode
-        iframeContainer.style.display = 'block'; // Show the iframe container
-    }
-
-    // Fetch the show details when the page loads
-    window.onload = fetchShowDetails;
+    fetchShowDetails();
 </script>
 
 </body>
