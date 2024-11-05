@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamDrop - TV Show Details</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #f4f4f4;
+            background-color: #121212;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            width: 90%;
+            max-width: 800px;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+            text-align: center;
+            position: relative;
+        }
+        .go-back {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            font-size: 16px;
+            background-color: #0073e6;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .go-back:hover {
+            background-color: #005bb5;
+        }
+        h1 {
+            color: #ffffff;
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .season-buttons, .episode-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .button {
+            background-color: #0073e6;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #005bb5;
+        }
+        .info {
+            margin-top: 20px;
+            text-align: center;
+        }
+        iframe {
+            width: 100%;
+            height: 500px;
+            margin-top: 20px;
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="index.html" class="go-back">Go Back</a>
+    <h1>TV Show Details</h1>
+    <div id="season-buttons" class="season-buttons"></div>
+    <div id="episode-buttons" class="episode-buttons"></div>
+    <div id="show-info" class="info"></div>
+    <iframe id="tv-iframe" frameborder="0" scrolling="no" allowfullscreen></iframe>
+</div>
+
+<script>
+    const API_KEY = '931664f0'; // Your OMDb API key
+
+    async function loadShow() {
+        const searchParams = new URLSearchParams(window.location.search);
+        const searchTerm = searchParams.get('search');
+
+        const url = `https://www.omdbapi.com/?apikey=${API_KEY}&t=${encodeURIComponent(searchTerm)}`;
+        const response = await fetch(url);
+        const show = await response.json();
+
+        if (show.Response === "True") {
+            displayShow(show);
+        } else {
+            document.getElementById('show-info').innerHTML = '<p>Show not found.</p>';
+        }
+    }
+
+    function displayShow(show) {
+        document.getElementById('show-info').innerHTML = `
+            <h2>${show.Title}</h2>
+            <p><strong>Genres:</strong> ${show.Genre}</p>
+            <p><strong>IMDb Rating:</strong> ${show.imdbRating}</p>
+            <p><strong>Summary:</strong> ${show.Plot}</p>
+        `;
+        loadSeasons(show.imdbID);
+    }
+
+    async function loadSeasons(imdbID) {
+        const url = `https://www.omdbapi.com/?apikey=${API_KEY}&i=${imdbID}&Season=1`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.Response === "True") {
+            const seasons = data.Seasons;
+            const seasonButtonsDiv = document.getElementById('season-buttons');
+            seasonButtonsDiv.innerHTML = '';
+
+            seasons.forEach(season => {
+                const button = document.createElement('button');
+                button.className = 'button';
+                button.textContent = `Season ${season.Season}`;
+                button.onclick = () => loadEpisodes(imdbID, season.Season);
+                seasonButtonsDiv.appendChild(button);
+            });
+        }
+    }
+
+    async function loadEpisodes(imdbID, season) {
+        const url = `https://www.omdbapi.com/?apikey=${API_KEY}&i=${imdbID}&Season=${season}`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.Response === "True") {
+            const episodeButtonsDiv = document.getElementById('episode-buttons');
+            episodeButtonsDiv.innerHTML = '';
+
+            data.Episodes.forEach(episode => {
+                const button = document.createElement('button');
+                button.className = 'button';
+                button.textContent = `Episode ${episode.Episode}: ${episode.Title}`;
+                button.onclick = () => loadEpisode(imdbID, season, episode.Episode);
+                episodeButtonsDiv.appendChild(button);
+            });
+        }
+    }
+
+    function loadEpisode(imdbID, season, episode) {
+        const iframe = document.getElementById('tv-iframe');
+        iframe.src = `https://www.2embed.skin/embedtv/${imdbID}&s=${season}&e=${episode}`;
+    }
+
+    // Load TV show details when the page loads
+    window.onload = loadShow;
+</script>
+
+</body>
+</html>
