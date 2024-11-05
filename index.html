@@ -104,18 +104,15 @@
         const searchTerm = document.getElementById('search-input').value;
         const mediaType = document.querySelector('input[name="media-type"]:checked').value;
 
-        if (mediaType === 'tv') {
-            window.location.href = `tv.html?search=${encodeURIComponent(searchTerm)}`;
-            return;
-        }
-
-        const url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(searchTerm)}&page=${currentPage}`;
+        // Reset currentPage for new search
+        currentPage = 1;
+        const url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(searchTerm)}&type=${mediaType}&page=${currentPage}`;
         const response = await fetch(url);
         const data = await response.json();
 
         if (data.Response === "True") {
             totalResults = parseInt(data.totalResults);
-            displayResults(data.Search);
+            displayResults(data.Search, mediaType);
             if (currentPage * 10 < totalResults) {
                 document.getElementById('view-more').style.display = 'block';
             } else {
@@ -126,23 +123,32 @@
         }
     }
 
-    function displayResults(results) {
+    function displayResults(results, mediaType) {
         const resultsContainer = document.getElementById('results');
         resultsContainer.innerHTML = '';
 
-        results.forEach(movie => {
-            const card = document.createElement('div');
-            card.className = 'result-card';
-            card.innerHTML = `
-                <img src="${movie.Poster !== 'N/A' ? movie.Poster : 'https://via.placeholder.com/300x450?text=No+Image'}" alt="${movie.Title}" width="100%">
-                <h3>${movie.Title}</h3>
-                <p>(${movie.Year})</p>
-            `;
-            card.onclick = () => {
-                localStorage.setItem('selectedMovieID', movie.imdbID);
-                window.location.href = 'movie.html';
-            };
-            resultsContainer.appendChild(card);
+        results.forEach(item => {
+            // Only display results that match the selected media type
+            if ((mediaType === 'movie' && item.Type === 'movie') || (mediaType === 'tv' && item.Type === 'series')) {
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                card.innerHTML = `
+                    <img src="${item.Poster !== 'N/A' ? item.Poster : 'https://via.placeholder.com/300x450?text=No+Image'}" alt="${item.Title}" width="100%">
+                    <h3>${item.Title}</h3>
+                    <p>(${item.Year})</p>
+                `;
+                card.onclick = () => {
+                    if (mediaType === 'movie') {
+                        localStorage.setItem('selectedMovieID', item.imdbID);
+                        window.location.href = 'movie.html';
+                    } else {
+                        // Store the selected show ID and redirect to the TV page
+                        localStorage.setItem('selectedShowID', item.imdbID);
+                        window.location.href = 'tv.html';
+                    }
+                };
+                resultsContainer.appendChild(card);
+            }
         });
     }
 
