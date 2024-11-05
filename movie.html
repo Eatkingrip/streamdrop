@@ -3,132 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StreamDrop - Movie Details</title>
+    <title>Movie Details - StreamDrop</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
             color: #f4f4f4;
             background-color: #121212;
             margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .container {
-            width: 90%;
-            max-width: 800px;
             padding: 20px;
-            background-color: #1e1e1e;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
-            text-align: center;
-            position: relative; /* Add this for positioning the button */
-        }
-        .movie-info img {
-            width: 100%;
-            max-width: 300px;
-            border-radius: 8px;
-            margin-bottom: 20px;
         }
         h1 {
             color: #ffffff;
-            font-size: 28px;
-            margin-bottom: 10px;
-            font-weight: 600;
         }
-        .movie-details {
-            text-align: center;
-            margin: 20px 0;
-        }
-        .movie-details p {
-            font-size: 16px;
-            margin: 5px 0;
-        }
-        iframe {
-            width: 100%;
-            height: 500px;
+        #details {
             margin-top: 20px;
-            border-radius: 8px;
-            border: none;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
-        .go-back {
-            position: absolute; /* Positioning the button */
-            top: 20px; /* Distance from the top */
-            right: 20px; /* Distance from the right */
-            padding: 12px 20px;
-            font-size: 16px;
-            background-color: #0073e6;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: background-color 0.3s ease;
-        }
-        .go-back:hover {
-            background-color: #005bb5;
+        #iframe-container {
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <a href="index.html" class="go-back">Go Back</a> <!-- Go Back Button -->
-    <div id="movie-info" class="movie-info">
-        <!-- Movie details will be dynamically populated here -->
-    </div>
-    <iframe id="movie-iframe" frameborder="0" scrolling="no" allowfullscreen></iframe>
-</div>
+<h1>Movie Details</h1>
+<div id="details"></div>
+<div id="iframe-container"></div>
 
 <script>
-    const API_KEY = '931664f0'; // OMDb API key
+    const API_KEY = '931664f0'; // Your OMDb API key
 
-    async function loadMovie() {
-        const imdbID = localStorage.getItem('selectedMovieID');
-        if (!imdbID) {
-            document.getElementById('movie-info').innerHTML = '<p>Movie not found.</p>';
+    async function fetchMovieDetails() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const movieID = urlParams.get('imdbID'); // Get the imdbID parameter
+
+        if (!movieID) {
+            document.getElementById('details').innerHTML = '<p>No movie selected.</p>';
             return;
         }
 
-        // Fetch movie details from OMDb API
-        const url = `https://www.omdbapi.com/?apikey=${API_KEY}&i=${imdbID}`;
-        try {
-            const response = await fetch(url);
-            const movie = await response.json();
+        const url = `https://www.omdbapi.com/?apikey=${API_KEY}&i=${movieID}&plot=full`;
+        const response = await fetch(url);
+        const data = await response.json();
 
-            if (movie.Response === "True") {
-                displayMovie(movie);
-            } else {
-                document.getElementById('movie-info').innerHTML = '<p>Movie details not available.</p>';
-            }
-        } catch (error) {
-            console.error("Error fetching movie details:", error);
-            document.getElementById('movie-info').innerHTML = '<p>Error loading movie details.</p>';
+        if (data.Response === "True") {
+            displayMovieDetails(data);
+        } else {
+            document.getElementById('details').innerHTML = `<p>${data.Error}</p>`;
         }
     }
 
-    function displayMovie(movie) {
-        const movieInfoDiv = document.getElementById('movie-info');
-        movieInfoDiv.innerHTML = `
-            <img src="${movie.Poster !== 'N/A' ? movie.Poster : 'https://via.placeholder.com/300x450?text=No+Image'}" alt="${movie.Title}">
-            <h1>${movie.Title}</h1>
-            <div class="movie-details">
-                <p><strong>Genres:</strong> ${movie.Genre}</p>
-                <p><strong>IMDb Rating:</strong> ${movie.imdbRating}</p>
-                <p><strong>Release Year:</strong> ${movie.Year}</p>
-                <p><strong>Summary:</strong> ${movie.Plot}</p>
-            </div>
+    function displayMovieDetails(data) {
+        const detailsContainer = document.getElementById('details');
+        detailsContainer.innerHTML = `
+            <h2>${data.Title} (${data.Year})</h2>
+            <img src="${data.Poster}" alt="${data.Title}" style="width: 300px;">
+            <p><strong>Director:</strong> ${data.Director}</p>
+            <p><strong>Genre:</strong> ${data.Genre}</p>
+            <p><strong>Plot:</strong> ${data.Plot}</p>
         `;
 
-        // Set up the iframe with the movie's IMDb ID
-        const iframe = document.getElementById('movie-iframe');
-        iframe.src = `https://www.2embed.cc/embed/${movie.imdbID}`;
+        // Optionally add iframe or buttons for additional functionality here
     }
 
-    // Load movie details when the page loads
-    window.onload = loadMovie;
+    fetchMovieDetails();
 </script>
 
 </body>
