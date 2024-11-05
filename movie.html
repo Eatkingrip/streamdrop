@@ -52,6 +52,22 @@
             border: none;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
+        .go-back {
+            margin-top: 20px;
+            display: inline-block;
+            padding: 12px 20px;
+            font-size: 16px;
+            background-color: #0073e6;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .go-back:hover {
+            background-color: #005bb5;
+        }
     </style>
 </head>
 <body>
@@ -61,6 +77,7 @@
         <!-- Movie details will be dynamically populated here -->
     </div>
     <iframe id="movie-iframe" frameborder="0" scrolling="no" allowfullscreen></iframe>
+    <a href="index.html" class="go-back">Go Back</a> <!-- Go Back Button -->
 </div>
 
 <script>
