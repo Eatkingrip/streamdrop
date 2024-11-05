@@ -101,17 +101,24 @@
     let totalResults = 0;
 
     async function search() {
-        const searchTerm = document.getElementById('search-input').value;
+        const searchTerm = document.getElementById('search-input').value.trim();
         const mediaType = document.querySelector('input[name="media-type"]:checked').value;
 
         // Reset currentPage for new search
         currentPage = 1;
+
+        // Check if search term is empty
+        if (!searchTerm) {
+            alert("Please enter a search term.");
+            return;
+        }
+
         const url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(searchTerm)}&type=${mediaType}&page=${currentPage}`;
         const response = await fetch(url);
         const data = await response.json();
 
         // Debugging log to check the API response
-        console.log(data);
+        console.log("API Response:", data);
 
         if (data.Response === "True") {
             totalResults = parseInt(data.totalResults);
@@ -122,7 +129,7 @@
                 document.getElementById('view-more').style.display = 'none';
             }
         } else {
-            document.getElementById('results').innerHTML = '<p>No results found.</p>';
+            document.getElementById('results').innerHTML = `<p>${data.Error}</p>`;
         }
     }
 
