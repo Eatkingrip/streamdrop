@@ -137,14 +137,14 @@
                     <h3>${item.Title}</h3>
                     <p>(${item.Year})</p>
                 `;
+                // Set click event to store the selected item ID without immediate redirection
                 card.onclick = () => {
+                    localStorage.setItem(mediaType === 'movie' ? 'selectedMovieID' : 'selectedShowID', item.imdbID);
+                    // Here we do not redirect to the page
                     if (mediaType === 'movie') {
-                        localStorage.setItem('selectedMovieID', item.imdbID);
-                        window.location.href = 'movie.html';
+                        window.location.href = 'movie.html'; // Redirect to movie page
                     } else {
-                        // Store the selected show ID and redirect to the TV page
-                        localStorage.setItem('selectedShowID', item.imdbID);
-                        window.location.href = 'tv.html';
+                        window.location.href = 'tv.html'; // Redirect to TV page
                     }
                 };
                 resultsContainer.appendChild(card);
