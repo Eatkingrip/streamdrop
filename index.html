@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StreamDrop - Movies and TV Shows</title>
+    <title>StreamDrop - Home</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -49,10 +49,14 @@
         .go-button:hover {
             background-color: #005bb5;
         }
-        .radio-container {
-            margin: 0 20px;
+        .radio-buttons {
             display: flex;
             align-items: center;
+            margin-left: 20px;
+        }
+        .radio-buttons label {
+            margin-right: 10px;
+            color: #ffffff;
         }
         .results {
             display: grid;
@@ -101,11 +105,11 @@
 <h1>StreamDrop</h1>
 <div class="search-container">
     <input type="text" id="search-input" class="search-box" placeholder="Search for movies or TV shows...">
-    <div class="radio-container">
-        <label><input type="radio" name="category" value="movie" checked> Movie</label>
-        <label><input type="radio" name="category" value="series"> TV Show</label>
-    </div>
     <button class="go-button" onclick="search()">Go</button>
+    <div class="radio-buttons">
+        <label><input type="radio" name="media-type" value="movie" checked> Movie</label>
+        <label><input type="radio" name="media-type" value="tv"> TV Show</label>
+    </div>
 </div>
 
 <div id="results" class="results"></div>
@@ -115,36 +119,26 @@
     const API_KEY = '931664f0'; // Your OMDb API key
     let currentPage = 1;
     let totalResults = 0;
-    let searchType = 'movie'; // Default search type
 
     async function search() {
-        const searchTerm = document.getElementById('search-input').value.trim();
-        currentPage = 1; // Reset currentPage for new search
-        searchType = document.querySelector('input[name="category"]:checked').value; // Get selected category
+        const searchTerm = document.getElementById('search-input').value;
+        const mediaType = document.querySelector('input[name="media-type"]:checked').value;
 
-        if (!searchTerm) {
-            alert("Please enter a search term.");
+        if (mediaType === 'tv') {
+            window.location.href = `tv.html?search=${encodeURIComponent(searchTerm)}`;
             return;
         }
 
-        let url;
-        if (searchType === 'movie') {
-            url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(searchTerm)}&type=movie&page=${currentPage}`;
-        } else {
-            url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(searchTerm)}&type=series&page=${currentPage}`;
-        }
-
+        const url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(searchTerm)}&page=${currentPage}`;
         const response = await fetch(url);
         const data = await response.json();
-
-        console.log("API Response:", data); // Debugging log
 
         if (data.Response === "True") {
             totalResults = parseInt(data.totalResults);
             displayResults(data.Search);
             document.getElementById('view-more').style.display = (currentPage * 10 < totalResults) ? 'block' : 'none';
         } else {
-            document.getElementById('results').innerHTML = `<p>${data.Error}</p>`;
+            document.getElementById('results').innerHTML = '<p>No results found.</p>';
         }
     }
 
@@ -152,18 +146,17 @@
         const resultsContainer = document.getElementById('results');
         resultsContainer.innerHTML = '';
 
-        results.forEach(item => {
+        results.forEach(movie => {
             const card = document.createElement('div');
             card.className = 'result-card';
             card.innerHTML = `
-                <img src="${item.Poster !== 'N/A' ? item.Poster : 'https://via.placeholder.com/300x450?text=No+Image'}" alt="${item.Title}">
-                <h3>${item.Title}</h3>
-                <p>(${item.Year})</p>
+                <img src="${movie.Poster !== 'N/A' ? movie.Poster : 'https://via.placeholder.com/300x450?text=No+Image'}" alt="${movie.Title}" width="100%">
+                <h3>${movie.Title}</h3>
+                <p>(${movie.Year})</p>
             `;
-            // Store the selected item ID in the URL for easy retrieval
             card.onclick = () => {
-                const idType = searchType === 'movie' ? 'movie' : 'show';
-                window.location.href = `${idType}.html?imdbID=${item.imdbID}`;
+                localStorage.setItem('selectedMovieID', movie.imdbID);
+                window.location.href = 'movie.html';
             };
             resultsContainer.appendChild(card);
         });
