@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamDrop - Movie Details</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #f4f4f4;
+            background-color: #121212;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 90%;
+            max-width: 800px;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+            text-align: center;
+        }
+        .movie-info img {
+            width: 100%;
+            max-width: 300px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #ffffff;
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .movie-details {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .movie-details p {
+            font-size: 16px;
+            margin: 5px 0;
+        }
+        iframe {
+            width: 100%;
+            height: 500px;
+            margin-top: 20px;
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="movie-info" class="movie-info">
+        <!-- Movie details will be dynamically populated here -->
+    </div>
+    <iframe id="movie-iframe" frameborder="0" scrolling="no" allowfullscreen></iframe>
+</div>
+
+<script>
+    const API_KEY = '931664f0'; // OMDb API key
+
+    async function loadMovie() {
+        const imdbID = localStorage.getItem('selectedMovieID');
+        if (!imdbID) {
+            document.getElementById('movie-info').innerHTML = '<p>Movie not found.</p>';
+            return;
+        }
+
+        // Fetch movie details from OMDb API
+        const url = `https://www.omdbapi.com/?apikey=${API_KEY}&i=${imdbID}`;
+        try {
+            const response = await fetch(url);
+            const movie = await response.json();
+
+            if (movie.Response === "True") {
+                displayMovie(movie);
+            } else {
+                document.getElementById('movie-info').innerHTML = '<p>Movie details not available.</p>';
+            }
+        } catch (error) {
+            console.error("Error fetching movie details:", error);
+            document.getElementById('movie-info').innerHTML = '<p>Error loading movie details.</p>';
+        }
+    }
+
+    function displayMovie(movie) {
+        const movieInfoDiv = document.getElementById('movie-info');
+        movieInfoDiv.innerHTML = `
+            <img src="${movie.Poster !== 'N/A' ? movie.Poster : 'https://via.placeholder.com/300x450?text=No+Image'}" alt="${movie.Title}">
+            <h1>${movie.Title}</h1>
+            <div class="movie-details">
+                <p><strong>Genres:</strong> ${movie.Genre}</p>
+                <p><strong>IMDb Rating:</strong> ${movie.imdbRating}</p>
+                <p><strong>Release Year:</strong> ${movie.Year}</p>
+                <p><strong>Summary:</strong> ${movie.Plot}</p>
+            </div>
+        `;
+
+        // Set up the iframe with the movie's IMDb ID
+        const iframe = document.getElementById('movie-iframe');
+        iframe.src = `https://www.2embed.cc/embed/${movie.imdbID}`;
+    }
+
+    // Load movie details when the page loads
+    window.onload = loadMovie;
+</script>
+
+</body>
+</html>
