@@ -106,7 +106,7 @@
 </div>
 
 <script>
-    const API_KEY = '931664f0'; // Your OMDb API key
+    const API_KEY = '931664f0'; // Replace this with your OMDb API key
 
     async function performSearch() {
         const query = document.getElementById('searchQuery').value;
@@ -118,10 +118,12 @@
         }
 
         const url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(query)}&type=${type}`;
+        console.log("URL:", url); // Log the URL to check if it's correct
 
         try {
             const response = await fetch(url);
             const data = await response.json();
+            console.log("Response:", data); // Log the response to see if data is received
 
             if (data.Response === "True") {
                 displayResults(data.Search);
